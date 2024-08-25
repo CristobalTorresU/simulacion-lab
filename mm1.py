@@ -81,7 +81,7 @@ def tiempoPromedioResidencia(listaTiemposResidencia, cantidadDeJobs, cantidadDeJ
 time = 0.0
 queuetime = 0.0
 listaTiemposArribos = []
-actualqueue = 0
+largoDeColaActual = 0
 tiemposDeServicio = []
 tiempoCantidadCola = [0]
 tiempoDeEspera = [0]
@@ -96,7 +96,6 @@ jobsQueLlegaron = 1
 jobIdInSistem = 0
 jobId = 1
 jobsEnColaList = []
-tiempotrabajo = args[1]
 tiempoUltimoJobsSalido = 0.0
 
 #   Simular tiempos interarribos
@@ -130,15 +129,15 @@ while time <= args[2]:
             tiempoServicioActual -= arriboJob - time
             break
 
-        if(actualqueue > 0):
-            tiempoCantidadCola = incrementarConteoTiempoCola(actualqueue, tiempoServicioActual, tiempoCantidadCola)
+        if(largoDeColaActual > 0):
+            tiempoCantidadCola = incrementarConteoTiempoCola(largoDeColaActual, tiempoServicioActual, tiempoCantidadCola)
             for job in jobsEnColaList:
                 tiempoDeEspera = ingresarTiempoDeEspera(job, tiempoServicioActual, tiempoDeEspera)
             jobsEnColaList.pop(0)
             time += tiempoServicioActual
             tiempoDeResidencia = ingresarTiempoDeResidencia(jobIdInSistem, tiempoDeEspera[jobIdInSistem] + tiempoServicioActual, tiempoDeResidencia)
             tiempoUltimoJobsSalido = time
-            actualqueue -= 1
+            largoDeColaActual -= 1
             jobsQueSalieron += 1
             if(len(tiemposDeServicio) == 0):
                 break
@@ -148,9 +147,9 @@ while time <= args[2]:
             time = arriboJob
 
     if(listaTiemposArribos != []):
-        tiempoCantidadCola = incrementarConteoTiempoCola(actualqueue, arriboJob - time, tiempoCantidadCola)
+        tiempoCantidadCola = incrementarConteoTiempoCola(largoDeColaActual, arriboJob - time, tiempoCantidadCola)
         time = arriboJob
-        actualqueue += 1
+        largoDeColaActual += 1
         arriboJob = listaTiemposArribos.pop(0)
         jobsEnColaList.append(jobId)
         jobId += 1
@@ -162,7 +161,7 @@ Utilizaciones = utilizacion(args[0], args[1], tiempoCantidadCola)
 LargosPromedio = largoPromedioCola(args[2], tiempoCantidadCola, tiempoDeEspera, tiempoUltimoJobsSalido)
 TiemposDeResidencia = tiempoPromedioResidencia(tiempoDeResidencia, jobsQueLlegaron, jobsQueSalieron)
 
-#   Medidas de Rendimiento
+#   Resultados Medidas de Rendimiento
 print("Numero de jobs que llegaron: ", jobsQueLlegaron)
 print("Numero de jobs que salieron: ", jobsQueSalieron)
 print("Tiempo total de cola vacıa: ", tiempoCantidadCola[0])
