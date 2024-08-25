@@ -123,14 +123,21 @@ if(listaTiemposArribos == []):
     arriboJob = 0.0
 else:
     arriboJob = listaTiemposArribos.pop(0)
+
+#   La simulación continúa hasta el tiempo límite.
 while time <= args[2]:
+
+    #   Sección encargada del evento de salida del sistema.
     while (arriboJob > time):
         if((time + tiempoServicioActual) > arriboJob and (time + tiempoServicioActual) <= args[2]):
             tiempoServicioActual -= arriboJob - time
             break
-
+        
+        #   Si la cola no está vacía, se permite la simulación del siguiente job al sistema.
         if(largoDeColaActual > 0):
             tiempoCantidadCola = incrementarConteoTiempoCola(largoDeColaActual, tiempoServicioActual, tiempoCantidadCola)
+
+            #   Ciclo encargado de aumentar los contadores de los tiempos de espera de cada job en la cola.
             for job in jobsEnColaList:
                 tiempoDeEspera = ingresarTiempoDeEspera(job, tiempoServicioActual, tiempoDeEspera)
             jobsEnColaList.pop(0)
@@ -139,13 +146,16 @@ while time <= args[2]:
             tiempoUltimoJobsSalido = time
             largoDeColaActual -= 1
             jobsQueSalieron += 1
+
+            #   Si no hay tiempos de servicio dentro del rango permitido de tiempo de simulación, se termina la sección de evento de salida.
             if(len(tiemposDeServicio) == 0):
                 break
             tiempoServicioActual = tiemposDeServicio.pop(0)
         else:
             tiempoCantidadCola[0] += arriboJob - time
             time = arriboJob
-
+    
+    #   Si hay tiempos de arribos simulados dentro del tiempo límite, se ingresa el job a la cola.
     if(listaTiemposArribos != []):
         tiempoCantidadCola = incrementarConteoTiempoCola(largoDeColaActual, arriboJob - time, tiempoCantidadCola)
         time = arriboJob
@@ -156,6 +166,7 @@ while time <= args[2]:
     else:
         tiempoCantidadCola[0] += args[2] - time
         break
+
 
 Utilizaciones = utilizacion(args[0], args[1], tiempoCantidadCola)
 LargosPromedio = largoPromedioCola(args[2], tiempoCantidadCola, tiempoDeEspera, tiempoUltimoJobsSalido)
