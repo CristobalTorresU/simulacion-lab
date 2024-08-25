@@ -15,9 +15,6 @@ def obtenerVariables(optlist) :
     tasaDeServicio = float(optlist[1][1])
     tiempoEnd = float(optlist[2][1])
     
-    #   Se muestran las variables
-    #print(tasaDeArribos, " " , tasaDeServicio, " " , tiempoEnd)
-
     return [tasaDeArribos, tasaDeServicio, tiempoEnd]
 
 #   Generador de tiempos Inter-arribos
@@ -25,6 +22,7 @@ def generadorNumerosAleatorios(a):
     y = numpy.random.uniform()
     x = -(1 / a) * numpy.log(1 - y)
     return x
+
 def incrementarConteoTiempoCola(cantidadEnCola, tiempo, lista):
     if(cantidadEnCola + 1 > len(lista)):
         lista.append(tiempo)
@@ -46,44 +44,43 @@ def ingresarTiempoDeResidencia(idJob, tiempo, lista):
         lista[idJob] += tiempo
     return lista
 
+
 #   Medidas de Rendimiento
 
 def utilizacion(tasaArribo, tasaServicio, listaTiempos):
     Utilizacion_teorica = args[0]/args[1]
+    suma = 0
     for time_counted in tiempoCantidadCola:
-        sum += time_counted
-    Utilizacion_computada = 1-(tiempoCantidadCola[0]/sum)
+        suma += time_counted
+    Utilizacion_computada = 1-(tiempoCantidadCola[0]/suma)
     return [Utilizacion_teorica, Utilizacion_computada]
 
 def largoPromedioCola(tiempoTotal, listaTiempos, listaTiemposEspera, tiempoUltimoJob):
     count = 0
+    suma = 0
+    sum1 = 0
     for time_counted in listaTiempos:
-        sum += count*time_counted
+        suma += count*time_counted
         count += 1
-    largoPromedioComputado = sum/tiempoTotal
+    largoPromedioComputado = suma/tiempoTotal
     for timeofWaiting in listaTiemposEspera:
         sum1 += timeofWaiting
     largoPromedioTeorico = sum1/tiempoUltimoJob
     return [largoPromedioComputado, largoPromedioTeorico]
 
-
 def tiempoPromedioResidencia(listaTiemposResidencia, cantidadDeJobs, cantidadDeJobsSalidos):
+    suma = 0
     for timeCounted in listaTiemposResidencia:
-        sum += timeCounted
-    tiempoPromComputado = sum/cantidadDeJobsSalidos
-    tiempoPromTeorico = sum/cantidadDeJobs
+        suma += timeCounted
+    tiempoPromComputado = suma/cantidadDeJobsSalidos
+    tiempoPromTeorico = suma/cantidadDeJobs
     return [tiempoPromComputado, tiempoPromTeorico]
-
-
-
-#   Inicia el Simulador
-#def iniciarSimulador():
 
 
 #   Main
 time = 0.0
 queuetime = 0.0
-cola = []
+listaTiemposArribos = []
 actualqueue = 0
 tiemposDeServicio = []
 tiempoCantidadCola = [0]
@@ -102,29 +99,31 @@ jobsEnColaList = []
 tiempotrabajo = args[1]
 tiempoUltimoJobsSalido = 0.0
 
-#Simular tiempos interarribos
+#   Simular tiempos interarribos
 while queuetime <= args[2]:
     jobarrival = float(generadorNumerosAleatorios(args[0]))
     if((queuetime + jobarrival)> args[2]):
         break
     jobsQueLlegaron += 1
     queuetime += jobarrival
-    cola.append(queuetime)
-#Simular tiempos de servicio
+    listaTiemposArribos.append(queuetime)
+
+#   Simular tiempos de servicio
 while time <= args[2]:
     tiempoServicio = float(generadorNumerosAleatorios(args[1]))
     time += tiempoServicio
     tiemposDeServicio.append(tiempoServicio)
-#Simulación
+
+#   Simulación
 time = 0.0
 if(tiemposDeServicio == []):
     tiempoServicioActual = 2020202002.0
 else:
     tiempoServicioActual = tiemposDeServicio.pop(0)
-if(cola == []):
+if(listaTiemposArribos == []):
     arriboJob = 0.0
 else:
-    arriboJob = cola.pop(0)
+    arriboJob = listaTiemposArribos.pop(0)
 while time <= args[2]:
     while (arriboJob > time):
         if((time + tiempoServicioActual) > arriboJob and (time + tiempoServicioActual) <= args[2]):
@@ -148,13 +147,13 @@ while time <= args[2]:
             tiempoCantidadCola[0] += arriboJob - time
             time = arriboJob
 
-    if(cola != []):
+    if(listaTiemposArribos != []):
         tiempoCantidadCola = incrementarConteoTiempoCola(actualqueue, arriboJob - time, tiempoCantidadCola)
         time = arriboJob
         actualqueue += 1
-        arriboJob = cola.pop(0)
+        arriboJob = listaTiemposArribos.pop(0)
         jobsEnColaList.append(jobId)
-        jobid += 1
+        jobId += 1
     else:
         tiempoCantidadCola[0] += args[2] - time
         break
